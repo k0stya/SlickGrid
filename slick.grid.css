@@ -155,3 +155,43 @@ classes should alter those!
   position: absolute;
   border: 2px dashed black;
 }
+
+.slick-fixed-panel{
+	background-color: white;
+	float:left;
+	overflow:hidden;
+	margin-right:-1px;
+	z-index:1;
+	position:relative;
+}
+
+/*	Fixed panel and columns styles START	*/
+.slick-fixed-columns{
+	clear:both;
+}
+
+.slick-fixed-columns .slick-fixed-column
+{
+	border-color: #C0C0C0;
+	border-bottom-style: solid;
+	border-right-style: dotted;
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+}
+
+.slick-fixed-columns .slick-fixed-column:first-child
+{
+	border-top-style: solid;
+	border-top-width: 1px;
+}
+
+.slick-fixed-columns .slick-fixed-column.alt
+{
+	background-color: #FAFAFA;
+}
+
+.slick-fixed-columns .slick-fixed-column .slick-fixed-content{
+	padding-top: 5px;
+	margin-left: 5px;
+}
+/*	Fixed panel and columns styles END	*/
