@@ -2270,7 +2270,7 @@ if (typeof Slick === "undefined") {
 
 				//	set default position, alignment with 'viewport' by top
 				$fixedColumnsPanel.css({
-					'margin-top': $viewport[0].offsetTop,
+					'margin-top': $viewport[0].offsetTop - 1,
 					'height': $viewport[0].clientHeight
 				});
 

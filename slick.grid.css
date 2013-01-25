@@ -28,10 +28,19 @@ classes should alter those!
   margin: 0;
   padding: 4px;
   border-right: 1px solid silver;
-  border-left: 0px;
-  border-top: 0px;
   border-bottom: 0px;
+  border-left: 0px;
+	border-top: 0px;
   float: left;
+}
+
+.slick-header {
+	border-left: 1px solid silver !important;
+}
+
+
+.slick-header-columns.slick-header-parents .slick-header-column {
+	border-bottom: 1px solid silver;
 }
 
 .slick-headerrow-column.ui-state-default {
@@ -156,7 +165,10 @@ classes should alter those!
   border: 2px dashed black;
 }
 
+/*	Fixed panel and columns styles START	*/
+
 .slick-fixed-panel{
+	border-top: 1px solid #C0C0C0;
 	background-color: white;
 	float:left;
 	overflow:hidden;
@@ -165,7 +177,6 @@ classes should alter those!
 	position:relative;
 }
 
-/*	Fixed panel and columns styles START	*/
 .slick-fixed-columns{
 	clear:both;
 }
@@ -177,12 +188,6 @@ classes should alter those!
 	border-right-style: dotted;
 	border-right-width: 1px;
 	border-bottom-width: 1px;
-}
-
-.slick-fixed-columns .slick-fixed-column:first-child
-{
-	border-top-style: solid;
-	border-top-width: 1px;
 }
 
 .slick-fixed-columns .slick-fixed-column.alt

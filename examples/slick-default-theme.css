@@ -6,7 +6,8 @@ classes should alter those!
 */
 
 .slick-header-columns {
-  background: url('../images/header-columns-bg.gif') repeat-x center bottom;
+  /*background: url('../images/header-columns-bg.gif') repeat-x center bottom;*/
+  background-color: #EBECEE;
   border-bottom: 1px solid silver;
 }
 
@@ -15,7 +16,7 @@ classes should alter those!
 }
 
 .slick-header-column {
-  background: url('../images/header-columns-bg.gif') repeat-x center bottom;
+  /*background: url('../images/header-columns-bg.gif') repeat-x center bottom;*/
   border-right: 1px solid silver;
 }
 
