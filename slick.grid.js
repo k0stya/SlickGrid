@@ -87,7 +87,8 @@ if (typeof Slick === "undefined") {
 			defaultFormatter: defaultFormatter,
 			forceSyncScrolling: false,
 			fixedColumns: false,
-			fixedColumnsBorder: 0
+			fixedColumnsBorder: 0,
+			fixedColumnsCleanup: true
 		};
 
 		var columnDefaults = {
@@ -1399,18 +1400,20 @@ if (typeof Slick === "undefined") {
 			}
 
 			function addToNested(column, depth) {
-				if (!nestedColumns) { nestedColumns = [] }
+				if (!nestedColumns) {
+					nestedColumns = [];
+				}
 				if (!nestedColumns[depth]) { nestedColumns[depth] = []; }
 				nestedColumns[depth].push(column);
 			}
 
 			var spacerIndex = 0;
 			function splitIntoLayers(columnsInput, depth) {
-				for (var index in columnsInput) {
+				for (var index = 0; index < columnsInput.length; index++) {
 					var column = columnsInput[index];
 					addToNested(column, depth);
 					if (column.children) {
-						splitIntoLayers(column.children, depth + 1)
+						splitIntoLayers(column.children, depth + 1);
 					}
 					else {
 						var spacer;
@@ -2051,6 +2054,9 @@ if (typeof Slick === "undefined") {
 			postProcessToRow = Math.min(options.enableAddRow ? getDataLength() : getDataLength() - 1, visible.bottom);
 			startPostProcessing();
 
+			// cleanup fixed columns if they exist in UI
+			cleanupFixedColumns();
+
 			// render fixed columns panel
 			renderFixedColumns();
 
@@ -2251,6 +2257,14 @@ if (typeof Slick === "undefined") {
 			}
 		}
 
+		function cleanupFixedColumns() {
+
+			if (options.fixedColumnsCleanup) {
+				$('div.slick-fixed-panel').remove();
+				options.fixedColumnsCleanup = false;
+			}
+		}
+
 		function renderFixedColumns() {
 
 			if (options.fixedColumns && !isFixedColumnsRendered) {
@@ -2282,7 +2296,7 @@ if (typeof Slick === "undefined") {
 
 		function appendFixedColumns() {
 
-			if ($fixedColumns != undefined) {
+			if ($fixedColumns != undefined && 0 < columns.length) {
 				var field = columns[0]['fixedColumn'];
 				var rows = $('.grid-canvas .slick-row');
 
