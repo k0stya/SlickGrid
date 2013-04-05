@@ -98,7 +98,9 @@ if (typeof Slick === "undefined") {
 			minWidth: 30,
 			rerenderOnResize: false,
 			headerCssClass: null,
-			defaultSortAsc: true,
+      defaultSortAsc: true,
+      focusable: true,
+      selectable: true,
 			fixedColumn: ''
 		};
 
@@ -325,7 +327,7 @@ if (typeof Slick === "undefined") {
 					.bind("dblclick", handleDblClick)
 					.bind("contextmenu", handleContextMenu)
 					.bind("draginit", handleDragInit)
-					.bind("dragstart", { distance: 3 }, handleDragStart)
+            .bind("dragstart", {distance: 3}, handleDragStart)
 					.bind("drag", handleDrag)
 					.bind("dragend", handleDragEnd)
 					.delegate(".slick-cell", "mouseenter", handleMouseEnter)
@@ -436,7 +438,7 @@ if (typeof Slick === "undefined") {
 		function getMaxSupportedCssHeight() {
 			var supportedHeight = 1000000;
 			// FF reports the height back but still renders blank after ~6M px
-			var testUpTo = navigator.userAgent.toLowerCase().match(/firefox/) ? 6000000 : 1000000000;
+      var testUpTo = navigator.userAgent.toLowerCase().match(/firefox/) ? 6000000 : 1000000000;
 			var div = $("<div style='display:none' />").appendTo(document.body);
 
 			while (true) {
@@ -522,11 +524,11 @@ if (typeof Slick === "undefined") {
 		}
 
 		function createColumnHeaders() {
-			function onMouseEnter() {
+      function onMouseEnter() {
 				$(this).addClass("ui-state-hover");
 			}
 
-			function onMouseLeave() {
+      function onMouseLeave() {
 				$(this).removeClass("ui-state-hover");
 			}
 
@@ -544,8 +546,9 @@ if (typeof Slick === "undefined") {
 				var header = createColumnHeader(m, $headers);
 
 				if (options.enableColumnReorder || m.sortable) {
-					header.on('mouseenter', onMouseEnter)
-						  .on('mouseleave', onMouseLeave);
+          header
+            .on('mouseenter', onMouseEnter)
+            .on('mouseleave', onMouseLeave);
 				}
 
 				if (m.sortable) {
@@ -703,7 +706,7 @@ if (typeof Slick === "undefined") {
 			$headers.filter(":ui-sortable").sortable("destroy");
 			$headers.sortable({
 				containment: "parent",
-				distance: 3,
+        distance: 3,
 				axis: "x",
 				cursor: "default",
 				tolerance: "intersection",
@@ -2336,7 +2339,7 @@ if (typeof Slick === "undefined") {
 				return false;
 			}
 
-			retval = trigger(self.onDragInit, dd, e);
+      var retval = trigger(self.onDragInit, dd, e);
 			if (e.isImmediatePropagationStopped()) {
 				return retval;
 			}
@@ -2611,7 +2614,9 @@ if (typeof Slick === "undefined") {
 			}
 		}
 
-		function scrollCellIntoView(row, cell) {
+    function scrollCellIntoView(row, cell, doPaging) {
+      scrollRowIntoView(row, doPaging);
+
 			var colspan = getColspan(row, cell);
 			var left = columnPosLeft[cell],
 			  right = columnPosRight[cell + (colspan > 1 ? colspan - 1 : 0)],
@@ -2718,7 +2723,7 @@ if (typeof Slick === "undefined") {
 
 			// if there previously was text selected on a page (such as selected text in the edit cell just removed),
 			// IE can't set focus to anything else correctly
-			if ($.browser.msie) {
+      if (navigator.userAgent.toLowerCase().match(/msie/)) {
 				clearTextSelection();
 			}
 
@@ -3169,8 +3174,7 @@ if (typeof Slick === "undefined") {
 			var pos = stepFn(activeRow, activeCell, activePosX);
 			if (pos) {
 				var isAddNewRow = (pos.row == getDataLength());
-				scrollRowIntoView(pos.row, !isAddNewRow);
-				scrollCellIntoView(pos.row, pos.cell);
+        scrollCellIntoView(pos.row, pos.cell, !isAddNewRow);
 				setActiveCellInternal(getCellNode(pos.row, pos.cell), isAddNewRow || options.autoEdit);
 				activePosX = pos.posX;
 				return true;
@@ -3198,8 +3202,7 @@ if (typeof Slick === "undefined") {
 				return;
 			}
 
-			scrollRowIntoView(row, false);
-			scrollCellIntoView(row, cell);
+      scrollCellIntoView(row, cell, false);
 			setActiveCellInternal(getCellNode(row, cell), false);
 		}
 
@@ -3222,12 +3225,8 @@ if (typeof Slick === "undefined") {
 				return columnMetadata[cell].focusable;
 			}
 
-			if (typeof columns[cell].focusable === "boolean") {
-				return columns[cell].focusable;
-			}
-
-			return true;
-		}
+      return columns[cell].focusable;
+    }
 
 		function canCellBeSelected(row, cell) {
 			if (row >= getDataLength() || row < 0 || cell >= columns.length || cell < 0) {
@@ -3244,12 +3243,8 @@ if (typeof Slick === "undefined") {
 				return columnMetadata.selectable;
 			}
 
-			if (typeof columns[cell].selectable === "boolean") {
-				return columns[cell].selectable;
-			}
-
-			return true;
-		}
+      return columns[cell].selectable;
+    }
 
 		function gotoCell(row, cell, forceEdit) {
 			if (!initialized) { return; }
@@ -3261,8 +3256,7 @@ if (typeof Slick === "undefined") {
 				return;
 			}
 
-			scrollRowIntoView(row, false);
-			scrollCellIntoView(row, cell);
+      scrollCellIntoView(row, cell, false);
 
 			var newCell = getCellNode(row, cell);
 
