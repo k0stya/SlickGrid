@@ -24,6 +24,10 @@
     .slick-group-title[level='2'] {
       font-style: italic;
     }
+
+		.row-green {
+			background-color: #C3FDB8
+		}
   </style>
 </head>
 <body>
@@ -271,6 +275,17 @@ function loadData(count) {
   dataView.setItems(data);
 }
 
+			function myRowCss(item) {
+				if (item.effortDriven) {
+					return {
+						cssClasses: "row-green"
+					}
+				}
+			}
+
+            var groupItemMetadataProvider = new Slick.Data.GroupItemMetadataProvider({
+				getRowMetadata: myRowCss
+			});
 
 $(".grid-header .ui-icon")
     .addClass("ui-state-default ui-corner-all")
@@ -282,7 +297,6 @@ $(".grid-header .ui-icon")
     });
 
 $(function () {
-  var groupItemMetadataProvider = new Slick.Data.GroupItemMetadataProvider();
   dataView = new Slick.Data.DataView({
     groupItemMetadataProvider: groupItemMetadataProvider,
     inlineFilters: true

@@ -126,6 +126,8 @@
         }
 
         grid.setColumns(visibleColumns);
+
+				_self.onColumnChanged.notify();
       }
     }
 
@@ -136,10 +138,10 @@
     init();
 
     return {
-      "getAllColumns": getAllColumns
+      "getAllColumns": getAllColumns,
+      "onColumnChanged": new Slick.Event()
     };
   }
-
   // Slick.Controls.ColumnPicker
   $.extend(true, window, { Slick:{ Controls:{ ColumnPicker:SlickColumnPicker }}});
 })(jQuery);
