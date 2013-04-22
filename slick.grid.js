@@ -1596,14 +1596,17 @@ if (typeof Slick === "undefined") {
 					? "height:" + rowPositionCache[row].height + "px;"
 					: ""
 			);
+			stringArray.push("' data-row='");
+			stringArray.push(row);
 			stringArray.push("'>");
 
-			var colspan, m;
+			var colspan, m, columnData;
 			for (var i = 0, ii = columns.length; i < ii; i++) {
 				m = columns[i];
 				colspan = 1;
+				columnData = null;
 				if (metadata && metadata.columns) {
-					var columnData = metadata.columns[m.id] || metadata.columns[i];
+					columnData = metadata.columns[m.id] || metadata.columns[i];
 					colspan = (columnData && columnData.colspan) || 1;
 					if (colspan === "*") {
 						colspan = ii - i;
@@ -1617,7 +1620,7 @@ if (typeof Slick === "undefined") {
 						break;
 					}
 
-					appendCellHtml(stringArray, row, i, colspan);
+					appendCellHtml(stringArray, row, i, colspan, columnData);
 				}
 
 				if (colspan > 1) {
@@ -1628,11 +1631,12 @@ if (typeof Slick === "undefined") {
 			stringArray.push("</div>");
 		}
 
-		function appendCellHtml(stringArray, row, cell, colspan) {
+		function appendCellHtml(stringArray, row, cell, colspan, columnData) {
 			var m = columns[cell];
 			var d = getDataItem(row);
 			var cellCss = "slick-cell l" + cell + " r" + Math.min(columns.length - 1, cell + colspan - 1) +
-				(m.cssClass ? " " + m.cssClass : "");
+				(m.cssClass ? " " + m.cssClass : "") +
+				(columnData && columnData.cssClass ? " " + columnData.cssClass : "");
 			if (row === activeRow && cell === activeCell) {
 				cellCss += (" active");
 			}
@@ -2011,6 +2015,7 @@ if (typeof Slick === "undefined") {
 			var cellsAdded;
 			var totalCellsAdded = 0;
 			var colspan;
+			var columnData;
 
 			for (var row = range.top; row <= range.bottom; row++) {
 				cacheEntry = rowsCache[row];
@@ -2043,8 +2048,9 @@ if (typeof Slick === "undefined") {
 					}
 
 					colspan = 1;
+					columnData = null;
 					if (metadata) {
-						var columnData = metadata[columns[i].id] || metadata[i];
+						columnData = metadata[columns[i].id] || metadata[i];
 						colspan = (columnData && columnData.colspan) || 1;
 						if (colspan === "*") {
 							colspan = ii - i;
@@ -2052,7 +2058,7 @@ if (typeof Slick === "undefined") {
 					}
 
 					if (columnPosRight[Math.min(ii - 1, i + colspan - 1)] > range.leftPx) {
-						appendCellHtml(stringArray, row, i, colspan);
+						appendCellHtml(stringArray, row, i, colspan, columnData);
 						cellsAdded++;
 					}
 
@@ -2387,7 +2393,6 @@ if (typeof Slick === "undefined") {
 		}
 
 		function renderFixedColumns() {
-
 			if (options.fixedColumns && !isFixedColumnsRendered) {
 
 				if ($fixedColumnsPanel == undefined) {
@@ -2400,7 +2405,7 @@ if (typeof Slick === "undefined") {
 					$fixedColumns.empty();
 
 				//	clear cache for render of new panel
-				fixedColumnsCach = [];
+				fixedColumnsCache = [];
 
 				//	append columns
 				appendFixedColumns();
@@ -2416,7 +2421,6 @@ if (typeof Slick === "undefined") {
 		}
 
 		function appendFixedColumns() {
-
 			if ($fixedColumns != undefined && 0 < columns.length) {
 				var field = columns[0]['fixedColumn'];
 				var rows = $('.grid-canvas .slick-row');
