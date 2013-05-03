@@ -137,6 +137,10 @@ classes should alter those!
   border-style: solid;
 }
 
+.slick-cell.rowspan {
+	z-index: 9;
+}
+
 .slick-cell:focus {
   outline: none;
 }
