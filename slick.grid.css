@@ -31,17 +31,21 @@ classes should alter those!
   border-right: 1px solid silver;
   border-bottom: 0px;
   border-left: 0px;
-	border-top: 0px;
+  border-top: 0px;
   float: left;
 }
 
+.slick-header-columns.slick-header-parents .slick-header-column {
+  height: 16px;
+}
+
 .slick-header {
-	border-left: 1px solid silver !important;
+  border-left: 1px solid silver !important;
 }
 
 
 .slick-header-columns.slick-header-parents .slick-header-column {
-	border-bottom: 1px solid silver;
+  border-bottom: 1px solid silver;
 }
 
 .slick-headerrow-column.ui-state-default {
@@ -138,7 +142,7 @@ classes should alter those!
 }
 
 .slick-cell.rowspan {
-	z-index: 9;
+  z-index: 9;
 }
 
 .slick-cell:focus {
@@ -167,38 +171,38 @@ classes should alter those!
   border: 2px dashed black;
 }
 
-/*	Fixed panel and columns styles START	*/
+/*  Fixed panel and columns styles START  */
 
 .slick-fixed-panel{
-	border-top: 1px solid #C0C0C0;
-	background-color: white;
-	float:left;
-	overflow:hidden;
-	margin-right:-1px;
-	z-index:1;
-	position:relative;
+  border-top: 1px solid #C0C0C0;
+  border-right: 1px solid transparent;
+  background-color: white;
+  float:left;
+  overflow:hidden;
+  margin-right:-1px;
+  z-index:1;
+  position:relative;
 }
 
-.slick-fixed-columns{
-	clear:both;
+.slick-fixed-column {
+  clear:both;
 }
 
-.slick-fixed-columns .slick-fixed-column
-{
-	border-color: #C0C0C0;
-	border-bottom-style: solid;
-	border-right-style: dotted;
-	border-right-width: 1px;
-	border-bottom-width: 1px;
+.slick-fixed-cell {
+  border-color: #C0C0C0;
+  border-bottom-style: solid;
+  border-right-style: dotted;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  cursor: default;
 }
 
-.slick-fixed-columns .slick-fixed-column.alt
-{
-	background-color: #FAFAFA;
+.slick-fixed-cell.alt {
+  background-color: #FAFAFA;
 }
 
-.slick-fixed-columns .slick-fixed-column .slick-fixed-content{
-	padding-top: 5px;
-	margin-left: 5px;
+.slick-fixed-cell .slick-fixed-content {
+  padding-top: 5px;
+  margin-left: 5px;
 }
-/*	Fixed panel and columns styles END	*/
+/*  Fixed panel and columns styles END  */

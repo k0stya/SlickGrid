@@ -105,10 +105,8 @@
 					height: rowHeights[0]
 				}
 			};
-			data.getItemMetadata = function (row) {
-				return metadata[row];
-			};
-			for (var i = 0; i < 50; i++) {
+
+			for (var i = 0; i < 500; i++) {
 				data[i] = {
 					title: "Task " + i,
 					duration: "5 days",
@@ -119,11 +117,19 @@
 				};
 			}
 
-			data.getItemMetadata = function (row) {
-				return metadata[row];
+			var dataView = {
+				getItem: function(row) {
+					return data[row];
+				},
+				getLength: function() {
+					return data.length;
+				},
+				getItemMetadata: function(row) {
+					return metadata[row];
+				}
 			};
 
-			grid = new Slick.Grid("#myGrid", data, columns, options);
+			grid = new Slick.Grid("#myGrid", dataView, columns, options);
 
 			$('#toggleSpans').click(function (e) {
 				var cell = metadata[3].columns[1];
@@ -137,14 +143,17 @@
 				grid.invalidateRow(3);
 				grid.render();
 			});
+			
 			$('#toggleHeight').click(function (e) {
 				metadata[6].height = metadata[6].height === rowHeights[0] ? rowHeights[1] : rowHeights[0];
 				grid.invalidateRow(6);
 				grid.render();
 			});
+			
 			$('#scrollTo').click(function (e) {
 				grid.scrollRowToTop($('#nRow').val());
 			});
+			
 			$('#nRow').keydown(function (e) {
 				if (e.keyCode == 13)
 					$('#scrollTo').click();

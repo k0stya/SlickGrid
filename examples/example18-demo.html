@@ -56,8 +56,7 @@
 		asyncEditorLoading: false,
 		autoEdit: false,
 		enableColumnReorder: false,
-		fixedColumns: true,
-		fixedColumnsBorder: 1
+		fixedColumn: { id: 'time' }
 	};
 	
 	function renderCell(row, cell, value, columnDef, dataContext) {
@@ -116,7 +115,6 @@
 					id: 'company',
 					name: rawData[j].companies[j1].title,
 					field: 'meeting',
-					fixedColumn: 'time',
 					formatter: renderCell
 				};
 
