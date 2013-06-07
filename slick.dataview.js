@@ -7,7 +7,9 @@
           Avg: AvgAggregator,
           Min: MinAggregator,
           Max: MaxAggregator,
-          Sum: SumAggregator
+          Sum: SumAggregator,
+          CheckCount: CheckCountAggregator,
+          DateRange: DateRangeAggregator
         }
       }
     }
@@ -37,7 +39,7 @@
     var rowsById = null;    // rows by id; lazy-calculated
     var filter = null;      // filter function
     var updated = null;     // updated item ids
-    var suspend = false;    // suspends the recalculation
+    var suspendCount = 0;   // suspends the recalculation
     var sortAsc = true;
     var fastSortField;
     var sortComparer;
@@ -80,12 +82,18 @@
 
 
     function beginUpdate() {
-      suspend = true;
+      suspendCount++;
     }
 
     function endUpdate() {
-      suspend = false;
-      refresh();
+      suspendCount--;
+      if (suspendCount === 0) {
+        refresh();
+      }
+    }
+
+    function isUpdating() {
+      return suspendCount > 0;
     }
 
     function setRefreshHints(hints) {
@@ -382,9 +390,9 @@
         return options.groupItemMetadataProvider.getTotalsRowMetadata(item);
       }
 
-            if (options.groupItemMetadataProvider) {
-                return options.groupItemMetadataProvider.getRowMetadata(item);
-            }
+      if (options.groupItemMetadataProvider) {
+        return options.groupItemMetadataProvider.getRowMetadata(item);
+      }
 
       return null;
     }
@@ -500,7 +508,7 @@
           group = groups[i];
           group.groups = extractGroups(group.rows, group);
         }
-      }      
+      }
 
       groups.sort(groupingInfos[level].comparer);
 
@@ -811,7 +819,7 @@
     }
 
     function refresh() {
-      if (suspend) {
+      if (isUpdating()) {
         return;
       }
 
@@ -844,7 +852,7 @@
 
     function syncGridSelection(grid, preserveHidden) {
       var self = this;
-      var selectedRowIds = self.mapRowsToIds(grid.getSelectedRows());;
+      var selectedRowIds = self.mapRowsToIds(grid.getSelectedRows());
       var inHandler;
 
       function update() {
@@ -918,6 +926,7 @@
       // methods
       "beginUpdate": beginUpdate,
       "endUpdate": endUpdate,
+      "isUpdating": isUpdating,
       "setPagingOptions": setPagingOptions,
       "getPagingInfo": getPagingInfo,
       "getItems": getItems,
@@ -1012,7 +1021,7 @@
         groupTotals.min = {};
       }
       groupTotals.min[this.field_] = this.min_;
-    }
+    };
   }
 
   function MaxAggregator(field) {
@@ -1036,7 +1045,7 @@
         groupTotals.max = {};
       }
       groupTotals.max[this.field_] = this.max_;
-    }
+    };
   }
 
   function SumAggregator(field) {
@@ -1058,7 +1067,62 @@
         groupTotals.sum = {};
       }
       groupTotals.sum[this.field_] = this.sum_;
-    }
+    };
+  }
+
+  function CheckCountAggregator(field) {
+    this.field_ = field;
+
+    this.init = function () {
+      this.count_ = 0;
+      this.checkCount_ = 0;
+    };
+
+    this.accumulate = new Function("item", '\
+      var val = item.' + this.field_ + ';\
+      this.count_++;\
+      if (val === true)\
+        this.checkCount_++;');
+
+    this.storeResult = function (groupTotals) {
+      if (!groupTotals.checkCount)
+        groupTotals.checkCount = {};
+
+      groupTotals.checkCount[this.field_] = {
+        checked: this.checkCount_,
+        count: this.count_
+      };
+    };
+  }
+
+  function DateRangeAggregator(field) {
+    this.field_ = field;
+
+    this.init = function () {
+      this.min_ = null;
+      this.max_ = null;
+    };
+
+    this.accumulate = new Function("item", '\
+      var val = item.' + this.field_ + ';\
+      if (val && val.valueOf) {\
+        val = val.valueOf();\
+        if (this.min_ === null || this.min_ > val)\
+          this.min_ = val;\
+        if (this.max_ === null || this.max_ < val)\
+          this.max_ = val;\
+      }\
+      ');
+
+    this.storeResult = function (groupTotals) {
+      if (!groupTotals.dateRange)
+        groupTotals.dateRange = {};
+
+      groupTotals.dateRange[this.field_] = {
+        min: this.min_ === null ? null : new Date(this.min_),
+        max: this.max_ === null ? null : new Date(this.max_)
+      };
+    };
   }
 
   // TODO:  add more built-in aggregators

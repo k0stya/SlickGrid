@@ -1680,7 +1680,8 @@ if (typeof Slick === "undefined") {
       var cellCss = "slick-cell l" + cell + " r" + Math.min(columns.length - 1, cell + colspan - 1) +
         (m.cssClass ? " " + m.cssClass : "") +
         (rowspan > 1 ? " rowspan" : "") +
-        (columnData && columnData.cssClass ? " " + columnData.cssClass : "");
+        (columnData && columnData.cssClass ? " " + columnData.cssClass : "") +
+        (columnData && columnData.transparent ? " slick-transparent" : "");
       if (row === activeRow && cell === activeCell) {
         cellCss += (" active");
       }
@@ -1711,8 +1712,6 @@ if (typeof Slick === "undefined") {
       stringArray.push("</div>");
 
       rowsCache[row].cellRenderQueue.push(cell);
-      rowsCache[row].cellColSpans[cell] = colspan;
-      rowsCache[row].cellRowSpans[cell] = rowspan;
     }
     
     function appendMetadataAttributes(stringArray, metadata) {
@@ -1728,6 +1727,7 @@ if (typeof Slick === "undefined") {
         i = i | 0;
         if (i !== activeRow) {
           if (i < rangeToKeep.top) {
+            // do not remove rows with rowspanned cells overlapping rangeToKeep
             if (!cellSpans[i] || i + cellSpans[i].maxRowSpan >= rangeToKeep.top) {
               continue;
             }
@@ -2115,7 +2115,7 @@ if (typeof Slick === "undefined") {
         // This is a string, so it needs to be cast back to a number.
         i = i | 0;
 
-        var colspan = cacheEntry.cellColSpans[i];
+        var colspan = getColspan(row, i);
         if (columnPosLeft[i] > range.rightPx ||
           columnPosRight[Math.min(columns.length - 1, i + colspan - 1)] < range.leftPx) {
           if (!(row == activeRow && i == activeCell)) {
@@ -2127,7 +2127,6 @@ if (typeof Slick === "undefined") {
       var cellToRemove;
       while ((cellToRemove = cellsToRemove.pop()) != null) {
         cacheEntry.rowNode.removeChild(cacheEntry.cellNodesByColumnIdx[cellToRemove]);
-        delete cacheEntry.cellColSpans[cellToRemove];
         delete cacheEntry.cellNodesByColumnIdx[cellToRemove];
         if (postProcessedRows[row]) {
           delete postProcessedRows[row][cellToRemove];
@@ -2184,8 +2183,6 @@ if (typeof Slick === "undefined") {
             appendCellHtml(stringArray, row, i, columnData);
             cellsAdded++;
           }
-
-          i += (colspan > 1 ? colspan - 1 : 0);
         }
 
         if (cellsAdded) {
@@ -2221,6 +2218,7 @@ if (typeof Slick === "undefined") {
           needToReselectCell = false,
           i, ii, colspan;
       
+      // collect rows with cell rowspans > 1 and overlapping the range top
       for (ii = 0; ii < columns.length; ii += colspan) {
         i = getSpanRow(range.top, ii);
         colspan = getColspan(i, ii);
@@ -2229,6 +2227,7 @@ if (typeof Slick === "undefined") {
         }
       }
 
+      // collect not rendered range rows
       for (i = range.top; i <= range.bottom; i++) {
         if (!rowsCache[i]) {
           rows.push(i);
@@ -2243,14 +2242,6 @@ if (typeof Slick === "undefined") {
         // start populatating it.
         rowsCache[i] = {
           "rowNode": null,
-
-          // ColSpans of rendered cells (by column idx).
-          // Can also be used for checking whether a cell has been rendered.
-          "cellColSpans": [],
-
-          // ColSpans of rendered cells (by column idx).
-          // Can also be used for checking whether a cell has been rendered.
-          "cellRowSpans": [],
 
           // Cell nodes (by column idx).  Lazy-populated by ensureCellNodesInRowsCache().
           "cellNodesByColumnIdx": [],
@@ -3231,7 +3222,7 @@ if (typeof Slick === "undefined") {
         }
       }
       
-      return cellSpans[row][cell];
+      return cellSpans[row] && cellSpans[row][cell];
     }
 
     function getColspan(row, cell) {
@@ -3312,10 +3303,9 @@ if (typeof Slick === "undefined") {
       do {
         cell = getSpanCell(posY, cell - 1);
         row = getSpanRow(posY, cell);
-      }
-      while (cell >= 0 && !canCellBeActive(row, cell));
+      } while (cell >= 0 && !canCellBeActive(row, cell));
       
-      if (cell < columns.length) {
+      if (cell >= 0) {
         return {
           "row": row,
           "cell": cell,
@@ -3330,8 +3320,7 @@ if (typeof Slick === "undefined") {
       var ub = getDataLength() + (options.enableAddRow ? 1 : 0);
       do {
         row += getRowspan(row, posX);
-      }
-      while (row <= ub && !canCellBeActive(row, cell = getSpanCell(row, posX)));
+      } while (row <= ub && !canCellBeActive(row, cell = getSpanCell(row, posX)));
 
       if (row <= ub) {
         return {
@@ -3351,10 +3340,9 @@ if (typeof Slick === "undefined") {
       do {
         row = getSpanRow(row - 1, posX);
         cell = getSpanCell(row, posX);
-      }
-      while (row >= 0 && !canCellBeActive(row, cell));
+      } while (row >= 0 && !canCellBeActive(row, cell));
 
-      if (cell < columns.length) {
+      if (row >= 0 && cell < columns.length) {
         return {
           "row": row,
           "cell": cell,
@@ -3534,16 +3522,21 @@ if (typeof Slick === "undefined") {
       }
 
       var rowMetadata = data.getItemMetadata && data.getItemMetadata(row);
-      if (rowMetadata && typeof rowMetadata.focusable === "boolean") {
-        return rowMetadata.focusable;
-      }
+      if (rowMetadata) {
+        var columnMetadata = rowMetadata && rowMetadata.columns;
+        columnMetadata = columnMetadata && (columnMetadata[columns[cell].id] || columnMetadata[cell]);
+        if (columnMetadata) {
+          if (columnMetadata.transparent === true) {
+            return false;
+          }
+          if (typeof columnMetadata.focusable === "boolean") {
+            return columnMetadata.focusable;
+          }
+        }
 
-      var columnMetadata = rowMetadata && rowMetadata.columns;
-      if (columnMetadata && columnMetadata[columns[cell].id] && typeof columnMetadata[columns[cell].id].focusable === "boolean") {
-        return columnMetadata[columns[cell].id].focusable;
-      }
-      if (columnMetadata && columnMetadata[cell] && typeof columnMetadata[cell].focusable === "boolean") {
-        return columnMetadata[cell].focusable;
+        if (typeof rowMetadata.focusable === "boolean") {
+          return rowMetadata.focusable;
+        }
       }
 
       return columns[cell].focusable;
