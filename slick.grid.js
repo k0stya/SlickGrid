@@ -1695,7 +1695,7 @@ if (typeof Slick === "undefined") {
 
       stringArray.push("<div class='" + cellCss + "'");
       var cellHeight = getCellHeight(row, rowspan);
-      if (cellHeight != options.rowHeight) {
+      if (cellHeight != options.rowHeight - cellHeightDiff) {
         stringArray.push(" style='height:" + cellHeight + "px'");
       }
       
@@ -1740,8 +1740,8 @@ if (typeof Slick === "undefined") {
     }
 
     function invalidate() {
-      updateRowCount();
       invalidateAllRows();
+      updateRowCount();
       render();
     }
 
@@ -1752,6 +1752,8 @@ if (typeof Slick === "undefined") {
       for (var row in rowsCache) {
         removeRowFromCache(row);
       }
+      rowPositionCache = {};
+      clearFixedColumn();
     }
 
     function removeRowFromCache(row) {
@@ -1853,6 +1855,8 @@ if (typeof Slick === "undefined") {
         }
       }
 
+      clearFixedColumn(invalidateTopFrom);
+
       for (row in intersectingCells) {
         for (c in intersectingCells[row]) {
           updateCell(+row, +c);
@@ -1929,13 +1933,14 @@ if (typeof Slick === "undefined") {
       var cellHeight = options.rowHeight;
       if (rowspan > 1) {
         var rowSpanBottomIdx = row + rowspan - 1;
-        cellHeight = getRowBottom(rowSpanBottomIdx) - getRowTop(row) - cellHeightDiff;
+        cellHeight = getRowBottom(rowSpanBottomIdx) - getRowTop(row);
       } else {
         var rowHeight = getRowHeight(row);
         if (rowHeight != options.rowHeight) {
-          cellHeight = rowHeight - cellHeightDiff;
+          cellHeight = rowHeight;
         }
       }
+      cellHeight -= cellHeightDiff;
       return cellHeight;
     }
 
@@ -2510,6 +2515,22 @@ if (typeof Slick === "undefined") {
         }
 
         toggleCellClass(4);
+      }
+    }
+    
+    function clearFixedColumn(fromRow) {
+      if ($fixedColumn) {
+        if (!(fromRow >= 0)) { fromRow = 0; }
+        if (fromRow === 0) {
+          $fixedColumn.empty();
+        } else {
+          var i = fixedColumnCellCount;
+          var column = $fixedColumn[0];
+          while (--i >= fromRow) {
+            column.removeChild(column.lastChild);
+          }
+        }
+        fixedColumnCellCount = fromRow;
       }
     }
 
